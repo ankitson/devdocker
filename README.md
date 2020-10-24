@@ -1,23 +1,34 @@
-1. ./build.sh to build the image
+1. Build the docker image
 
-2. create an external volume: 
+`(host)> sudo ./build.sh`
 
-docker volume create devbox_home
+2. Create an external volume: 
 
-3. run container with volume "devbox_home" mounted at /home/ankit
+`(host)> sudo docker volume create devbox_home`
 
-4. mount ssh keys into container and install
-    sudo docker run -it --volumes-from <container_id> --mount type=bind,src=/home/ankit/dockers/devenv/ssh-keys,dst=/home/ankit/ssh-keys/ alpine
-    
-    cd /home/ankit/
-    chmod +x addssh.sh
-    ./addssh.sh ankit 
+3. Run container
 
-5. ssh into the container with:
-  ssh -P 2201 ankit@localhost
+`(host)> sudo docker-compose up`
 
-6. track the dotfiles repo instead of a static copy: (hack because ssh keys should not be in docker image)
-   cd /home/ankit/
-   rm -rf /home/ankit/dotfiles
-   git clone git@github.com:ankitson/dotfiles.git
+4. Mount ssh keys into container and install
+
+    ```
+    (host)> sudo docker run -it --volumes-from <container_id> --mount type=bind,src=./ssh-keys,dst=/home/ankit/ssh-keys/ alpine
+       
+    (docker)# cd /home/ankit/
+    (docker)# chmod +x addssh.sh
+    (docker)# ./addssh.sh ankit 
+    ```
+
+5. ssh into the container:
+
+  ``ssh -P 2201 ankit@localhost```
+
+6. track the dotfiles repo instead of a static copy: (ssh keys should not be in docker image)
+
+   ```
+   (docker)# cd /home/ankit/
+   (docker)# rm -rf /home/ankit/dotfiles
+   (docker)# git clone git@github.com:ankitson/dotfiles.git
+   ```
 
