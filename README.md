@@ -13,7 +13,7 @@
 4. Mount ssh keys into container and install
 
     ```
-    (host)> sudo docker run -it --volumes-from <container_id> --mount type=bind,src=./ssh-keys,dst=/home/ankit/ssh-keys/ alpine
+    (host)> sudo docker run -it --volumes-from <container_id> --mount type=bind,src=`pwd`/ssh-keys,dst=/home/ankit/ssh-keys/ alpine
        
     (docker)# cd /home/ankit/
     (docker)# chmod +x addssh.sh
