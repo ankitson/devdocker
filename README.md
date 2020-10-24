@@ -22,7 +22,7 @@
 
 5. ssh into the container:
 
-  ``ssh -P 2201 ankit@localhost```
+  `ssh -P 2201 ankit@localhost`
 
 6. track the dotfiles repo instead of a static copy: (ssh keys should not be in docker image)
 
