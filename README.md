@@ -31,4 +31,22 @@
    (docker)# rm -rf /home/ankit/dotfiles
    (docker)# git clone git@github.com:ankitson/dotfiles.git
    ```
+7. run `postbuild.sh` to unminimize:
+   
+   ```
+   (docker)# cd /home/ankit
+   (docker)# ./postbuild.sh
+   ```
+
+8. commit the unminimized version:
+
+   ```
+   (host)> sudo docker commit <container_id> ankit/devbox:unminim
+   ```
+
+9. now use the commited image. remember to commit when you make changes outside of the mounted volumes you want to persist across container rebuild
+   
+   thanks to AuFS, new commits/images are only layers on top of previous images so disk use is low. 
+
+** Any images created after copying the ssh keys in (eg "unminim") should NOT be published **
 

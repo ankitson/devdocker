@@ -15,6 +15,9 @@ RUN sudo rm -rf /tmp/build
 
 WORKDIR /home/ankit
 COPY addssh.sh /home/ankit/
+COPY postbuild.sh /home/ankit/
+RUN sudo chown ankit:users postbuild.sh
+RUN sudo chmod +x /home/ankit/postbuild.sh
 
 COPY dotfiles/ /home/ankit/dotfiles
 RUN sudo chown -R ankit:users ~/dotfiles
