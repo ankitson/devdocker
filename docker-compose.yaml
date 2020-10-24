@@ -1,0 +1,15 @@
+version: "3.8"
+services:
+  devbox:
+    image: ankit/devbox:0.1
+    container_name: devbox
+    hostname: devbox
+    ports:
+      - "2201:22"
+    volumes:
+      - devbox_home:/home/dev
+    restart: always
+
+volumes:
+  devbox_home:
+    external: true
