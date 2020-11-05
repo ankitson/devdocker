@@ -11,6 +11,7 @@ sudo apt install -y -q \
   neovim               \
   fzf                  \
   ripgrep              \
+  fd-find	       \
   htop		       \
   jq 		       \
   git 		       \
