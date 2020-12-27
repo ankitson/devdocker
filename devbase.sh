@@ -14,12 +14,13 @@ sudo apt install -y -q \
   fd-find	       \
   htop		       \
   jq 		       \
-  git 		       \
+  git 		             \
   git-man              \
   tmux                 \
   curl                 \
   wget                 \
   openssh-server       \
+  net-tools            \
   unzip                \
   python3              \
   python3-pip          \
