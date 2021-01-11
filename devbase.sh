@@ -28,6 +28,3 @@ sudo apt install -y -q \
 
 curl -sL https://deb.nodesource.com/setup_14.x | sudo -E bash -
 sudo apt install -y -q nodejs
-
-#ohmyzsh
-sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" --unattended

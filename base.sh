@@ -18,7 +18,7 @@ apt install -y tzdata
 apt install -y sudo
 sed -ie '/sudo/ s/ALL$/NOPASSWD: ALL/' /etc/sudoers
 
-useradd ankit -u 1000 -d /home/ankit -s /bin/zsh -g users -G sudo --no-create-home
+useradd ankit -u 1000 -d /home/ankit -s /bin/bash -g users -G sudo --no-create-home
 mkdir -p /home/ankit && /bin/chown ankit:users /home/ankit
 
 apt install -y man
