@@ -11,10 +11,10 @@ sudo apt install -y -q \
   neovim               \
   fzf                  \
   ripgrep              \
-  fd-find	       \
-  htop		       \
-  jq 		       \
-  git 		             \
+  fd-find              \
+  htop                 \
+  jq                   \
+  git                  \
   git-man              \
   tmux                 \
   curl                 \
@@ -24,7 +24,7 @@ sudo apt install -y -q \
   unzip                \
   python3              \
   python3-pip          \
-  python3-venv       
+  python3-venv
 
 curl -sL https://deb.nodesource.com/setup_14.x | sudo -E bash -
 sudo apt install -y -q nodejs
