@@ -5,11 +5,13 @@ set -e
 
 sudo apt update && sudo apt upgrade -y
 
+#command line tools
 sudo apt install -y -q \
   build-essential      \
   zsh                  \
   neovim               \
   fzf                  \
+  tree                 \
   ripgrep              \
   fd-find              \
   htop                 \
