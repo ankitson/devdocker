@@ -24,6 +24,7 @@ sudo apt install -y -q \
   openssh-server       \
   net-tools            \
   unzip                \
+  rsync                \
 
 #language toolchains
 # python
