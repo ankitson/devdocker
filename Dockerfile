@@ -25,7 +25,7 @@ RUN sudo chown -R ankit:users ~/dotfiles
 WORKDIR /home/ankit/dotfiles/
 RUN bash /home/ankit/dotfiles/link.sh
 
-VOLUME ["/home/ankit/"]
+#VOLUME ["/home/ankit/"]
 
 
 # Run an ssh server.

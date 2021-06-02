@@ -23,6 +23,10 @@ sudo apt install -y -q \
   wget                 \
   openssh-server       \
   net-tools            \
+  iproute2             \
+  iputils-ping         \
+  traceroute           \
+  dnsutils             \
   unzip                \
   rsync                \
 
