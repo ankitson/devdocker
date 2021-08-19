@@ -20,7 +20,10 @@ RUN sudo chown ankit:users postbuild.sh
 RUN sudo chmod +x /home/ankit/postbuild.sh
 
 COPY dotfiles/ /home/ankit/dotfiles
-RUN sudo chown -R ankit:users ~/dotfiles
+RUN sudo chown -R ankit:users /home/ankit/dotfiles
+
+COPY bin/ /home/ankit/bin
+RUN sudo chown -R ankit:users /home/ankit/bin
 
 WORKDIR /home/ankit/dotfiles/
 RUN bash /home/ankit/dotfiles/link.sh

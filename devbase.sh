@@ -47,7 +47,8 @@ curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
 # postgres and sqlite
 sudo apt install -y -q \
   postgresql-client-12 \
-  sqlite3 sqlite3-doc
+  libpq-dev \
+  sqlite3 sqlite3-doc \
 
 #tools that depend on language toolchain
 $HOME/.cargo/bin/cargo install fselect
