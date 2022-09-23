@@ -1,9 +1,9 @@
 version: "3.8"
 services:
   devbox:
-    image: ankit/devbox:0.1
-    container_name: devbox
-    hostname: devbox
+    image: ankit/devbox:0.2
+    container_name: devbox2
+    hostname: devbox2
     ports:
       - "2201:22"
     volumes:

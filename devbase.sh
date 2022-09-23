@@ -1,13 +1,42 @@
 #!/bin/bash
-
 set -x
 set -e
-
 sudo apt update && sudo apt upgrade -y
 
-#command line tools
+# build dependencies
+sudo apt install -y -q   \
+  pkg-config             \
+  build-essential        \
+  libssl-dev             \
+  openssh-server         \
+  curl                   \
+  wget                   \
+
+# perf
+sudo apt install -y -q   \
+  linux-tools-common     \
+  linux-tools-generic    \
+# HACK:
+# perf complains about missing linux-tools even on a linux host (same kernel..)
+# maybe related to https://bugs.launchpad.net/ubuntu/+source/linux/+bug/1844443?
+sudo cp /usr/lib/linux-tools/*/perf /usr/bin/perf
+
+# sys monitoring
 sudo apt install -y -q \
-  build-essential      \
+  dstat                \
+  strace               \
+  htop                 \
+  net-tools            \
+  iproute2             \
+  iputils-ping         \
+  traceroute           \
+  dnsutils             \
+  netcat               \
+  ngrep                \
+  tcpdump              \
+
+#misc cli tools
+sudo apt install -y -q \
   zsh                  \
   neovim               \
   fzf                  \
@@ -15,41 +44,11 @@ sudo apt install -y -q \
   exa                  \
   ripgrep              \
   fd-find              \
-  htop                 \
   jq                   \
   git                  \
   git-man              \
   tmux                 \
   curl                 \
   wget                 \
-  openssh-server       \
-  net-tools            \
-  iproute2             \
-  iputils-ping         \
-  traceroute           \
-  dnsutils             \
   unzip                \
   rsync                \
-
-#language toolchains
-# python
-sudo apt install -y -q \
-  python3              \
-  python3-pip          \
-  python3-venv
-
-# nodejs
-curl -sL https://deb.nodesource.com/setup_14.x | sudo -E bash -
-sudo apt install -y -q nodejs
-
-# rust
-curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
-
-# postgres and sqlite
-sudo apt install -y -q \
-  postgresql-client-12 \
-  libpq-dev \
-  sqlite3 sqlite3-doc \
-
-#tools that depend on language toolchain
-$HOME/.cargo/bin/cargo install fselect
