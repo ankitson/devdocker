@@ -41,7 +41,6 @@ sudo apt install -y -q \
   neovim               \
   fzf                  \
   tree                 \
-  exa                  \
   ripgrep              \
   fd-find              \
   jq                   \
