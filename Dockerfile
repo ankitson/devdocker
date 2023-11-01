@@ -1,5 +1,5 @@
 #FROM ubuntu:21.10
-FROM nvidia/cuda:12.1.0-devel-ubuntu22.04 AS devbase
+FROM nvidia/cuda:12.2.2-devel-ubuntu22.04 AS devbase
 
 ARG DEBIAN_FRONTEND=noninteractive
 
@@ -11,6 +11,7 @@ COPY rust.sh /tmp/build/
 COPY sql.sh /tmp/build/
 COPY go.sh /tmp/build/
 COPY node.sh /tmp/build/
+COPY install_pnpm.sh /tmp/build/
 
 # the below command and mounts are so that APT downloads packages to the host and doesn't need to redownload for each build
 RUN rm -f /etc/apt/apt.conf.d/docker-clean; echo 'Binary::apt::APT::Keep-Downloaded-Packages "true";' > /etc/apt/apt.conf.d/keep-cache
@@ -32,6 +33,9 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked --mount=type=cache,t
 FROM devbase AS devbase_langtoolchains
 USER ankit
 RUN bash node.sh
+RUN bash install_pnpm.sh
+#RUN bash pnpm add typescript --global
+RUN bash cpp.sh
 RUN bash devbase.sh
 RUN bash python.sh
 RUN bash rust.sh

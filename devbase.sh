@@ -3,6 +3,8 @@ set -x
 set -e
 sudo apt update && sudo apt upgrade -y
 
+#NOTE: no whitespace after slashes in the following lines
+
 # build dependencies
 sudo apt install -y -q   \
   pkg-config             \
