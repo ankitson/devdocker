@@ -29,7 +29,8 @@ pip3 install         \
   matplotlib         \
   sympy              \
   nose               \
-  jax[cpu]           \
+  
+pip3 install -U "jax[cuda12_pip]" -f https://storage.googleapis.com/jax-releases/jax_cuda_releases.html
 
 #LLM
 pip3 install         \
@@ -40,3 +41,8 @@ pip3 install         \
 # segfaults if installed with others
 pip3 install         \
   ipython            \
+
+# pre-commit
+pip3 install         \
+  pre-commit
+pre-commit install

@@ -4,3 +4,4 @@
   - example - rust nightly toolchain install
   - example - matplotlib?
   - pnpm
+  - vscode extensions are wiped away

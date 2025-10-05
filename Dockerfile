@@ -7,11 +7,12 @@ WORKDIR /tmp/build
 COPY base.sh /tmp/build/
 COPY devbase.sh /tmp/build/
 COPY python.sh /tmp/build/
+COPY cpp.sh /tmp/build/
+COPY node.sh /tmp/build/
+COPY install_pnpm.sh /tmp/build/
 COPY rust.sh /tmp/build/
 COPY sql.sh /tmp/build/
 COPY go.sh /tmp/build/
-COPY node.sh /tmp/build/
-COPY install_pnpm.sh /tmp/build/
 
 # the below command and mounts are so that APT downloads packages to the host and doesn't need to redownload for each build
 RUN rm -f /etc/apt/apt.conf.d/docker-clean; echo 'Binary::apt::APT::Keep-Downloaded-Packages "true";' > /etc/apt/apt.conf.d/keep-cache
@@ -32,12 +33,12 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked --mount=type=cache,t
 
 FROM devbase AS devbase_langtoolchains
 USER ankit
+RUN bash devbase.sh
+RUN bash python.sh
+RUN bash cpp.sh
 RUN bash node.sh
 RUN bash install_pnpm.sh
 #RUN bash pnpm add typescript --global
-RUN bash cpp.sh
-RUN bash devbase.sh
-RUN bash python.sh
 RUN bash rust.sh
 RUN bash sql.sh
 RUN bash go.sh

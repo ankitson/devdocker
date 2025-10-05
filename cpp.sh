@@ -27,9 +27,10 @@ sudo apt install -y -q   \
   llvm                   \
   python3-clang          
 
-# cmake
+# cmake, ninja, meson
 sudo apt install -y -q   \
   cmake                  \
   cmake-doc              \
   ninja-build            \
-  cmake-format           
+  cmake-format           \
+  meson
