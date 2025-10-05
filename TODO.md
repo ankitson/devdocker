@@ -5,3 +5,5 @@
   - example - matplotlib?
   - pnpm
   - vscode extensions are wiped away
+
+- use UV instead of pip?
