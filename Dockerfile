@@ -1,5 +1,5 @@
 #FROM ubuntu:21.10
-FROM nvidia/cuda:12.8.0-devel-ubuntu22.04 AS devbase
+FROM nvidia/cuda:12.8.1-cudnn-devel-ubuntu22.04 AS devbase
 
 ARG DEBIAN_FRONTEND=noninteractive
 
