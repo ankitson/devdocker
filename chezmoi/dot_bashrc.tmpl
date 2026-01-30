@@ -1,0 +1,114 @@
+# If not running interactively, don't do anything
+case $- in
+    *i*) ;;
+      *) return;;
+esac
+
+#############
+## HISTORY ##
+#############
+shopt -s histappend
+HISTSIZE=10000
+HISTFILESIZE=20000
+
+# check the window size after each command
+shopt -s checkwinsize
+
+# set variable identifying the chroot you work in (used in the prompt below)
+if [ -z "${debian_chroot:-}" ] && [ -r /etc/debian_chroot ]; then
+    debian_chroot=$(cat /etc/debian_chroot)
+fi
+
+# set a fancy prompt (non-color, unless we know we "want" color)
+case "$TERM" in
+    xterm-color|*-256color) color_prompt=yes;;
+esac
+
+# Git prompt
+GIT_PS1_SHOWDIRTYSTATE=1
+[ -f "$HOME/.git-branch.sh" ] && source "$HOME/.git-branch.sh"
+
+if [ "$color_prompt" = yes ]; then
+  if type __git_ps1 &>/dev/null; then
+    PS1='\[\033[33m\][\D{%y/%m/%d %H:%M}]\[\033[0m\]${debian_chroot:+($debian_chroot)}\[\033[01;32m\]\u@\h\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\]$(__git_ps1 " (%s)")\$ '
+  else
+    PS1='${debian_chroot:+($debian_chroot)}\[\033[01;32m\]\u@\h\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\]\$ '
+  fi
+else
+  PS1='${debian_chroot:+($debian_chroot)}\u@\h:\w\$ '
+fi
+unset color_prompt force_color_prompt
+
+# If this is an xterm set the title to user@host:dir
+case "$TERM" in
+xterm*|rxvt*)
+    PS1="\[\e]0;${debian_chroot:+($debian_chroot)}\u@\h: \w\a\]$PS1"
+    ;;
+esac
+
+
+# Bash completion
+if ! shopt -oq posix; then
+  if [ -f /usr/share/bash-completion/bash_completion ]; then
+    . /usr/share/bash-completion/bash_completion
+  elif [ -f /etc/bash_completion ]; then
+    . /etc/bash_completion
+  fi
+fi
+
+# Editor
+export EDITOR=nvim
+
+# fzf
+[ -f /usr/share/doc/fzf/examples/key-bindings.bash ] && source /usr/share/doc/fzf/examples/key-bindings.bash
+[ -f /usr/share/doc/fzf/examples/completion.bash ] && source /usr/share/doc/fzf/examples/completion.bash
+
+export CLICOLOR=1
+export LS_COLORS+=':ow=01;33'
+
+{{ if .is_devbox -}}
+# === Devbox toolchain PATHs ===
+
+# Rust
+[ -f "$HOME/.cargo/env" ] && . "$HOME/.cargo/env"
+
+# Python (uv + base venv)
+export PATH="$HOME/python-base/bin:$PATH"
+export PATH="$HOME/.local/bin:$PATH"
+
+# Go
+export PATH="/usr/local/go/bin:$HOME/go/bin:$PATH"
+
+# C++
+export CC=clang
+export CXX=clang++
+
+# CUDA
+export PATH="/usr/local/cuda/bin:$PATH"
+export LD_LIBRARY_PATH="/usr/local/cuda/lib64${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
+
+# Java
+if [ -d /usr/lib/jvm/jdk-21.0.2 ]; then
+  export JAVA_HOME=/usr/lib/jvm/jdk-21.0.2
+  export PATH="$JAVA_HOME/bin:$PATH"
+fi
+
+# Coursier (Scala)
+export PATH="$HOME/.local/share/coursier/bin:$PATH"
+
+# Custom bin
+export PATH="$HOME/bin:$PATH"
+
+# Completions
+command -v terraform &>/dev/null && complete -C "$(which terraform)" terraform
+command -v uv &>/dev/null && eval "$(uv generate-shell-completion bash)"
+command -v uvx &>/dev/null && eval "$(uvx --generate-shell-completion bash)"
+
+# Quake terminal session
+if [ -n "${QUAKE}" ] && [ -z "${TMUX}" ]; then
+  tmux new-session -A -s quake
+fi
+{{ end -}}
+
+# Aliases after PATH is built
+[ -f "$HOME/.alias.sh" ] && source "$HOME/.alias.sh"

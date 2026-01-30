@@ -1,48 +1,54 @@
-#FROM ubuntu:21.10
 FROM nvidia/cuda:12.8.1-cudnn-devel-ubuntu22.04 AS devbase
 
 ARG DEBIAN_FRONTEND=noninteractive
 
 WORKDIR /tmp/build
-COPY base.sh /tmp/build/
-COPY devbase.sh /tmp/build/
-COPY python.sh /tmp/build/
-COPY cpp.sh /tmp/build/
-COPY node.sh /tmp/build/
-COPY install_pnpm.sh /tmp/build/
-COPY rust.sh /tmp/build/
-COPY sql.sh /tmp/build/
-COPY go.sh /tmp/build/
 
-# the below command and mounts are so that APT downloads packages to the host and doesn't need to redownload for each build
+# apt setup and system packages (no COPY dependencies — cached until base image changes)
 RUN rm -f /etc/apt/apt.conf.d/docker-clean; echo 'Binary::apt::APT::Keep-Downloaded-Packages "true";' > /etc/apt/apt.conf.d/keep-cache
-RUN --mount=type=cache,target=/var/cache/apt,sharing=locked --mount=type=cache,target=/var/lib/apt,sharing=locked apt update 
-RUN --mount=type=cache,target=/var/cache/apt,sharing=locked --mount=type=cache,target=/var/lib/apt,sharing=locked bash -c 'yes | unminimize'
-RUN --mount=type=cache,target=/var/cache/apt,sharing=locked --mount=type=cache,target=/var/lib/apt,sharing=locked apt install -y language-pack-en
+RUN apt update
+RUN bash -c 'yes | unminimize'
+RUN apt install -y language-pack-en
 ENV LANGUAGE=en_US.UTF-8
 ENV LANG=en_US.UTF-8
 ENV LC_ALL=en_US.UTF-8
-RUN --mount=type=cache,target=/var/cache/apt,sharing=locked --mount=type=cache,target=/var/lib/apt,sharing=locked bash -c 'locale-gen en_US.UTF-8 && dpkg-reconfigure locales'
+RUN bash -c 'locale-gen en_US.UTF-8 && dpkg-reconfigure locales'
 ENV TZ=America/Vancouver
-RUN --mount=type=cache,target=/var/cache/apt,sharing=locked --mount=type=cache,target=/var/lib/apt,sharing=locked apt install -y tzdata
+RUN apt install -y tzdata
+RUN apt install -y -q curl
 
-RUN --mount=type=cache,target=/var/cache/apt,sharing=locked --mount=type=cache,target=/var/lib/apt,sharing=locked bash base.sh
-
-RUN --mount=type=cache,target=/var/cache/apt,sharing=locked --mount=type=cache,target=/var/lib/apt,sharing=locked apt install -y -q curl
+# base.sh: creates user, installs core apt packages
+COPY base.sh /tmp/build/
+RUN bash base.sh
 
 FROM devbase AS devbase_langtoolchains
-USER ankit
+WORKDIR /tmp/build
+
+# --- system-wide installs (run as root) ---
+
+COPY devbase.sh /tmp/build/
 RUN bash devbase.sh
-RUN bash python.sh
+
+COPY cpp.sh /tmp/build/
 RUN bash cpp.sh
+
+COPY node.sh /tmp/build/
 RUN bash node.sh
-RUN wget -qO- https://get.pnpm.io/install.sh | ENV="$HOME/.bashrc" SHELL="$(which bash)" bash -
-ENV PATH="/home/ankit/.local/share/pnpm:${PATH}"
-ENV PNPM_HOME="/home/ankit/.local/share/pnpm"
-RUN /home/ankit/.local/share/pnpm/pnpm add typescript --global
-RUN bash rust.sh
+
+COPY sql.sh /tmp/build/
 RUN bash sql.sh
+
+COPY go.sh /tmp/build/
 RUN bash go.sh
+
+# --- user home dir installs ---
+USER ankit
+
+COPY python-uv.sh /tmp/build/
+RUN bash python-uv.sh
+
+COPY rust.sh /tmp/build/
+RUN bash rust.sh
 
 WORKDIR /
 
@@ -51,22 +57,23 @@ RUN sudo rm -rf /tmp/build
 FROM devbase_langtoolchains AS devbox
 
 WORKDIR /home/ankit
-COPY addssh.sh /home/ankit/
-COPY postbuild.sh /home/ankit/
-RUN sudo chown ankit:users postbuild.sh
-RUN sudo chmod +x /home/ankit/postbuild.sh
 
-COPY dotfiles/ /home/ankit/dotfiles
-RUN sudo chown -R ankit:users /home/ankit/dotfiles
+# SSH keys
+COPY addssh.sh /home/ankit
+COPY ssh-keys/ /home/ankit/ssh-keys
+RUN sudo bash addssh.sh ankit && sudo rm -rf /home/ankit/addssh.sh /home/ankit/ssh-keys/
 
-COPY bin/ /home/ankit/bin
-RUN sudo chown -R ankit:users /home/ankit/bin
+# Dotfiles via chezmoi
+RUN sudo sh -c "$(curl -fsLS get.chezmoi.io)" -- -b /usr/local/bin
+COPY --chown=ankit:users chezmoi/ /home/ankit/.local/share/chezmoi/
+RUN mkdir -p /home/ankit/.config/chezmoi && \
+    printf '[data]\n  is_devbox = true\n' > /home/ankit/.config/chezmoi/chezmoi.toml
+RUN chezmoi apply --force
 
-WORKDIR /home/ankit/dotfiles/
-RUN rm /home/ankit/.bashrc
-RUN bash /home/ankit/dotfiles/link.sh
+vim +'PlugInstall --sync' +qa
 
-#VOLUME ["/home/ankit/"]
+# Projects mount point
+RUN sudo mkdir -p /projects && sudo chown ankit:users /projects
 
 # Run an ssh server.
 USER root

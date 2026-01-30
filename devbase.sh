@@ -55,10 +55,7 @@ sudo apt install -y -q \
   unzip                \
   rsync                \
 
-wget -qO - 'https://proget.makedeb.org/debian-feeds/prebuilt-mpr.pub' | gpg --dearmor | sudo tee /usr/share/keyrings/prebuilt-mpr-archive-keyring.gpg 1> /dev/null
-echo "deb [arch=all,$(dpkg --print-architecture) signed-by=/usr/share/keyrings/prebuilt-mpr-archive-keyring.gpg] https://proget.makedeb.org prebuilt-mpr $(lsb_release -cs)" | sudo tee /etc/apt/sources.list.d/prebuilt-mpr.list
-sudo apt update
-sudo apt install -y -q just
+curl --proto '=https' --tlsv1.2 -sSf https://just.systems/install.sh | sudo bash -s -- --to /usr/local/bin
 
 # ADD CLOUDFLARE TUNNEL
 curl -fsSL https://pkg.cloudflare.com/cloudflare-main.gpg | sudo tee /usr/share/keyrings/cloudflare-main.gpg >/dev/null
@@ -76,3 +73,21 @@ echo \
 sudo apt-get update
 sudo apt update
 sudo apt install -y -q docker-ce-cli
+
+# add terraform
+wget https://releases.hashicorp.com/terraform/1.14.4/terraform_1.14.4_linux_amd64.zip && \
+  wget https://releases.hashicorp.com/terraform/1.14.4/terraform_1.14.4_SHA256SUMS && \
+  wget https://releases.hashicorp.com/terraform/1.14.4/terraform_1.14.4_SHA256SUMS.sig && \
+  wget -qO- https://www.hashicorp.com/.well-known/pgp-key.txt | gpg --import && \
+  gpg --verify terraform_1.14.4_SHA256SUMS.sig terraform_1.14.4_SHA256SUMS && \
+  grep terraform_1.14.4_linux_amd64.zip terraform_1.14.4_SHA256SUMS | sha256sum -c && \
+  sudo unzip terraform_1.14.4_linux_amd64.zip -d /usr/local/bin/ && \
+  rm -f terraform_1.14.4_linux_amd64.zip terraform_1.14.4_SHA256SUMS terraform_1.14.4_SHA256SUMS.sig
+
+# add 1password
+ARCH="amd64"; \
+  OP_VERSION="v$(curl https://app-updates.agilebits.com/check/1/0/CLI2/en/2.0.0/N -s | grep -Eo '[0-9]+\.[0-9]+\.[0-9]+')"; \
+  curl -sSfo op.zip \
+  https://cache.agilebits.com/dist/1P/op2/pkg/"$OP_VERSION"/op_linux_amd64_"$OP_VERSION".zip \
+  && sudo unzip -od /usr/local/bin/ op.zip \
+  && rm op.zip
