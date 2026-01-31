@@ -50,6 +50,9 @@ RUN bash python-uv.sh
 COPY rust.sh /tmp/build/
 RUN bash rust.sh
 
+# Claude Code (native binary, installs to ~/.local/bin)
+RUN curl -fsSL https://claude.ai/install.sh | bash
+
 WORKDIR /
 
 RUN sudo rm -rf /tmp/build
@@ -67,10 +70,10 @@ RUN sudo bash addssh.sh ankit && sudo rm -rf /home/ankit/addssh.sh /home/ankit/s
 RUN sudo sh -c "$(curl -fsLS get.chezmoi.io)" -- -b /usr/local/bin
 COPY --chown=ankit:users chezmoi/ /home/ankit/.local/share/chezmoi/
 RUN mkdir -p /home/ankit/.config/chezmoi && \
-    printf '[data]\n  is_devbox = true\n' > /home/ankit/.config/chezmoi/chezmoi.toml
+    printf '[data]\n  is_devbox = true\n  is_homeserver = false\n' > /home/ankit/.config/chezmoi/chezmoi.toml
 RUN chezmoi apply --force
 
-vim +'PlugInstall --sync' +qa
+RUN vim +'PlugInstall --sync' +qa
 
 # Projects mount point
 RUN sudo mkdir -p /projects && sudo chown ankit:users /projects

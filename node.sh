@@ -14,3 +14,7 @@ sudo apt install -y -q nodejs
 sudo npm install -g pnpm
 sudo npm install -g bun
 sudo npm install -g typescript
+
+# AI coding assistants
+sudo npm install -g @openai/codex
+sudo npm install -g @google/gemini-cli
