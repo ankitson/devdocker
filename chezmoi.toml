@@ -1,0 +1,12 @@
+# Build-time chezmoi config for devbox Docker image.
+# personal=false skips 1Password secrets and SSH key deployment.
+# internal_network=false uses GitHub HTTPS (Docker build can't reach Gitea SSH).
+# At runtime, run `chezmoi init` to re-evaluate .chezmoi.toml.tmpl with
+# proper hostname detection and interactive prompts.
+[data]
+  email = "dev@ankitson.com"
+  hostname = "devbox"
+  personal = false
+  is_devbox = true
+  is_homeserver = false
+  internal_network = false

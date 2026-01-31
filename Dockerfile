@@ -68,12 +68,9 @@ RUN sudo bash addssh.sh ankit && sudo rm -rf /home/ankit/addssh.sh /home/ankit/s
 
 # Dotfiles via chezmoi
 RUN sudo sh -c "$(curl -fsLS get.chezmoi.io)" -- -b /usr/local/bin
-COPY --chown=ankit:users chezmoi/ /home/ankit/.local/share/chezmoi/
-RUN mkdir -p /home/ankit/.config/chezmoi && \
-    printf '[data]\n  is_devbox = true\n  is_homeserver = false\n' > /home/ankit/.config/chezmoi/chezmoi.toml
+COPY --chown=ankit:users dotfiles/ /home/ankit/.local/share/chezmoi/
+COPY --chown=ankit:users chezmoi.toml /home/ankit/.config/chezmoi/chezmoi.toml
 RUN chezmoi apply --force
-
-RUN vim +'PlugInstall --sync' +qa
 
 # Projects mount point
 RUN sudo mkdir -p /projects && sudo chown ankit:users /projects
