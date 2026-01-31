@@ -1,5 +1,34 @@
 # Devbox Docker Changelog
 
+## 2026-01-30
+
+Chezmoi dotfiles v2 integration, ed25519 SSH keys, latest dev tool versions.
+
+### Chezmoi dotfiles v2
+- chezmoi source dir renamed `chezmoi/` → `dotfiles/` (matches the repo name)
+- Build-time config moved to standalone `chezmoi.toml` file (was inline `printf`)
+- Config sets `personal = false` (skips 1Password), `internal_network = false` (uses GitHub HTTPS for externals during build)
+- Cleaned up legacy non-chezmoi files from dotfiles dir (`link.sh`, `git-branch.sh`, `nvim/`, `polybar/`, `vim-plug/`, `custom.zsh-theme`) that chezmoi was deploying to `~` as-is
+- Run `chezmoi init` at runtime to re-evaluate config with proper hostname detection and 1Password
+
+### SSH keys: RSA → ed25519
+- `addssh.sh` updated to copy ed25519 keys (`ssh-keys/dev.pem` → `~/.ssh/id_ed25519`)
+- Removed RSA `id_rsa` / `id_rsa.pub` handling
+- `authorized_keys` built from all `*.pub` files found
+
+### Dev tools: latest versions via language package managers
+- `fzf` installed via `go install` in `go.sh` (was apt 0.29, now latest)
+- `ripgrep` and `fd-find` installed via `cargo install` in `rust.sh` (were apt 13.0/8.3, now latest)
+- `neovim` installed from GitHub releases in `devbase.sh` (was apt 0.6, now latest 0.10+)
+- Removed `fzf`, `ripgrep`, `fd-find`, `neovim` from apt install block
+
+### Build improvements
+- Removed `--no-cache` from `build.sh` — Docker layer caching now works across rebuilds
+- `run_once_after_install-tmux-plugins.sh` no longer fails the build on transient plugin download errors (`|| true`)
+
+### Node
+- Added AI coding assistants: `@openai/codex`, `@google/gemini-cli`
+
 ## v1.0 (2026-01-29)
 
 Major restructure: split-brain home directory, chezmoi dotfiles, modernized toolchain installs.
