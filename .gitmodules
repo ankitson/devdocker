@@ -1,3 +1,5 @@
 [submodule "dotfiles"]
 	path = dotfiles
 	url = git@github.com:ankitson/dotfiles.git
+[submodule "images/devdocker"]
+	url = ../devdocker.git
