@@ -41,11 +41,7 @@ sudo apt install -y -q \
 #misc cli tools
 sudo apt install -y -q \
   zsh                  \
-  neovim               \
-  fzf                  \
   tree                 \
-  ripgrep              \
-  fd-find              \
   jq                   \
   git                  \
   git-man              \
@@ -54,6 +50,12 @@ sudo apt install -y -q \
   wget                 \
   unzip                \
   rsync                \
+
+# neovim (Ubuntu 22.04 has 0.6, latest is 0.10+)
+curl -fsSL "https://github.com/neovim/neovim/releases/latest/download/nvim-linux-x86_64.tar.gz" \
+  | sudo tar xz -C /opt/ && sudo ln -sf /opt/nvim-linux-x86_64/bin/nvim /usr/local/bin/nvim
+
+# fzf, ripgrep, fd installed via go/cargo in go.sh and rust.sh respectively
 
 curl --proto '=https' --tlsv1.2 -sSf https://just.systems/install.sh | sudo bash -s -- --to /usr/local/bin
 

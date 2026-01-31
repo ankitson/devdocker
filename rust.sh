@@ -11,6 +11,8 @@ rustup default nightly
 # rust wasm
 curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh 
 
+$HOME/.cargo/bin/cargo install ripgrep
+$HOME/.cargo/bin/cargo install fd-find
 $HOME/.cargo/bin/cargo install fselect
 $HOME/.cargo/bin/cargo install flamegraph
 $HOME/.cargo/bin/cargo install cargo-generate
