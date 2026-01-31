@@ -26,7 +26,7 @@ System-wide installs (as root):
 - **go.sh**: Go 1.25.6, fzf (via `go install`)
 
 User home dir installs (as `ankit`):
-- **python-uv.sh**: uv, Python 3.14 + 3.12, base venv at `~/python-base` with numpy/scipy/pandas/matplotlib/jax/torch/langchain/openai, CLI tools (pre-commit, ruff)
+- **python-uv.sh**: uv, Python 3.14 + 3.12, lightweight `~/python-base` venv (numpy/scipy/pandas/matplotlib/sympy/ipython), CLI tools (pre-commit, ruff)
 - **rust.sh**: rustup (nightly default), wasm-pack, cargo crates: ripgrep, fd-find, fselect, flamegraph, cargo-generate, eza
 - **Claude Code**: installed to `~/.local/bin`
 
@@ -52,7 +52,8 @@ images/devdocker/
   node.sh                 # Node.js, pnpm, bun, typescript, AI assistants
   sql.sh                  # PostgreSQL client, SQLite
   go.sh                   # Go, fzf
-  python-uv.sh            # uv, Python, ML/AI packages
+  uv.toml                 # system-wide uv config → /etc/uv/uv.toml
+  python-uv.sh            # uv, Python, lightweight base venv
   rust.sh                 # Rust, cargo tools (rg, fd, eza, etc.)
   docs/                   # this documentation
   logs/                   # build logs (gitignored)
@@ -99,6 +100,12 @@ After booting and signing into 1Password, run `chezmoi init` to re-evaluate `.ch
 | `is_devbox` | true | true | false |
 | `is_homeserver` | false | false | true |
 | `internal_network` | false | true | true |
+
+## Python / uv cache
+
+Host-shared cache at `/projects/.uv-cache` — persists across container rebuilds, supports hardlinks to per-project `.venv` dirs. PyTorch CUDA 12.8 index pre-configured in `/etc/uv/uv.toml`. `~/python-base` is a lightweight scratch venv (ipython, numpy, pandas), not a cache mechanism.
+
+See [uv-caching.md](uv-caching.md) and [uv-README.md](uv-README.md) for details and per-project usage.
 
 ## SSH keys
 

@@ -41,6 +41,9 @@ RUN bash sql.sh
 COPY go.sh /tmp/build/
 RUN bash go.sh
 
+# System-wide uv config (PyTorch CUDA index, host-shared cache at /projects/.uv-cache)
+COPY uv.toml /etc/uv/uv.toml
+
 # --- user home dir installs ---
 USER ankit
 
@@ -72,8 +75,9 @@ COPY --chown=ankit:users dotfiles/ /home/ankit/.local/share/chezmoi/
 COPY --chown=ankit:users chezmoi.toml /home/ankit/.config/chezmoi/chezmoi.toml
 RUN chezmoi apply --force
 
-# Projects mount point
+# Projects mount point + uv README
 RUN sudo mkdir -p /projects && sudo chown ankit:users /projects
+COPY --chown=ankit:users docs/uv-README.md /home/ankit/uv-README.md
 
 # Run an ssh server.
 USER root

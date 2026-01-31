@@ -1,8 +1,17 @@
 # Devbox Docker Changelog
 
-## 2026-01-30
+## v1.1 (2026-01-30)
 
-Chezmoi dotfiles v2 integration, ed25519 SSH keys, latest dev tool versions.
+Chezmoi dotfiles v2, ed25519 SSH keys, host-shared uv cache, latest dev tool versions.
+
+### Python: host-shared uv cache (replaces baked-in ML packages)
+- Added `/etc/uv/uv.toml` with system-wide config: `cache-dir = "/projects/.uv-cache"`, `link-mode = "hardlink"`, PyTorch CUDA 12.8 index
+- `python-uv.sh` no longer installs torch, jax, langchain, openai, huggingface-hub, or nose
+- `python-base` venv is now a lightweight scratch env (ipython, numpy, scipy, pandas, matplotlib, sympy, python-dotenv)
+- Heavy CUDA packages (torch, jax) are installed per-project via `uv add` — cached on the host mount at `/projects/.uv-cache`
+- Build uses a throwaway `UV_CACHE_DIR=/tmp/uv-cache-build` (host mount doesn't exist during build, so system config cache-dir would write to a shadowed image layer)
+- Added `docs/uv-README.md` (copied to `~/uv-README.md` in image) with per-project usage examples
+- See `docs/uv-caching.md` and `docs/shared-uv-cache.txt` for design rationale
 
 ### Chezmoi dotfiles v2
 - chezmoi source dir renamed `chezmoi/` → `dotfiles/` (matches the repo name)

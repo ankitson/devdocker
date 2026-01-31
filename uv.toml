@@ -1,0 +1,17 @@
+# System-wide uv config for devbox.
+# Installed to /etc/uv/uv.toml during Docker build.
+#
+# Host-shared cache: /projects/.uv-cache lives on the bind mount so it
+# persists across container rebuilds and supports hardlinks to per-project
+# .venv directories (same filesystem).
+#
+# The PyTorch CUDA index is defined here so every project can use it via
+# [tool.uv.sources] in pyproject.toml without repeating the URL.
+
+cache-dir = "/projects/.uv-cache"
+link-mode = "hardlink"
+
+[[index]]
+name = "pytorch-cu128"
+url = "https://download.pytorch.org/whl/cu128"
+explicit = true
