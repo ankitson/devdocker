@@ -7,13 +7,14 @@ sudo apt update && sudo apt upgrade -y
 #NOTE: no whitespace after slashes in the following lines
 
 # build dependencies
-sudo apt install -y -q   \
-  pkg-config             \
-  build-essential        \
-  libssl-dev             \
-  openssh-server         \
-  curl                   \
-  wget                   \
+sudo apt install -y -q       \
+  pkg-config                 \
+  build-essential            \
+  libssl-dev                 \
+  openssh-server             \
+  software-properties-common \
+  curl                       \
+  wget                       \
 
 # perf
 sudo apt install -y -q   \
@@ -43,13 +44,23 @@ sudo apt install -y -q \
   zsh                  \
   tree                 \
   jq                   \
-  git                  \
-  git-man              \
   tmux                 \
   curl                 \
   wget                 \
   unzip                \
   rsync                \
+
+# git (newer version supports zdiff3)
+sudo apt install -y -q 
+sudo add-apt-repository -y ppa:git-core/ppa
+sudo apt update
+sudo apt install -y -q git git-man
+
+# git-lfs (latest from GitHub, not stale apt version)
+GIT_LFS_VERSION="$(curl -fsSL https://api.github.com/repos/git-lfs/git-lfs/releases/latest | jq -r '.tag_name' | sed 's/^v//')" && \
+  curl -fsSL "https://github.com/git-lfs/git-lfs/releases/download/v${GIT_LFS_VERSION}/git-lfs-linux-amd64-v${GIT_LFS_VERSION}.tar.gz" \
+  | sudo tar xz -C /usr/local/bin/ --strip-components=1 --wildcards '*/git-lfs' && \
+  git lfs install
 
 # neovim (Ubuntu 22.04 has 0.6, latest is 0.10+)
 curl -fsSL "https://github.com/neovim/neovim/releases/latest/download/nvim-linux-x86_64.tar.gz" \
