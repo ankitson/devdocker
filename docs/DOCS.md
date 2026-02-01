@@ -46,6 +46,8 @@ images/devdocker/
   dotfiles/               # chezmoi source directory (git submodule, cloned from GitHub at build)
   ssh-keys/               # ed25519 keypair (gitignored)
   addssh.sh               # copies ssh-keys/ into ~/.ssh/ during build
+  first-run.sh            # interactive first-run setup (1Password sign-in)
+  agent-first-run.sh      # non-interactive agent setup (service account)
   base.sh                 # user creation, locale
   devbase.sh              # apt packages, neovim, git-lfs, just, terraform, 1password, cloudflared, docker
   cpp.sh                  # clang/LLVM, cmake, ninja, meson
@@ -111,12 +113,54 @@ chezmoi init --apply
 | `.chezmoiexternal.toml.tmpl` | (externals) | tpm, vim-plug, clankerpedia |
 
 ### Feature flags (chezmoi data)
-| Flag | Build | Runtime (devbox) | Runtime (homeserver) |
-|---|---|---|---|
-| `personal` | false | true | true |
-| `is_devbox` | true | true | false |
-| `is_homeserver` | false | false | true |
-| `internal_network` | false | true | true |
+| Flag | Build | Runtime (devbox) | Runtime (homeserver) | Runtime (agent) |
+|---|---|---|---|---|
+| `personal` | false | true | true | true |
+| `is_devbox` | true | true | false | true |
+| `is_homeserver` | false | false | true | false |
+| `is_agent` | false | false | false | true |
+| `internal_network` | false | true | true | false |
+
+## Agent mode
+
+For automated agents (CI, Claude Code tasks, etc.) that need secrets but can't use interactive 1Password sign-in.
+
+### Prerequisites
+1. A 1Password **`Agents` vault** with items: `agent-ssh` (SSH keypair), `claude-code` (OAuth token)
+2. A 1Password **service account** with READ access to the `Agents` vault
+3. The service account token (`ops_...`) passed as `OP_SERVICE_ACCOUNT_TOKEN` at runtime
+
+### How it works
+When `OP_SERVICE_ACCOUNT_TOKEN` is set, chezmoi automatically sets `is_agent=true` and `personal=true`. The `[onepassword] mode = "service"` config tells chezmoi to use the service account token instead of `op signin` sessions. All `onepasswordRead` calls in templates use the `Agents` vault instead of the `Private` vault.
+
+### Setup
+```bash
+# One-shot: run agent task and exit
+docker run -e OP_SERVICE_ACCOUNT_TOKEN="$TOKEN" ankit/devbox:1.3 \
+  bash -lc '~/agent-first-run.sh && claude --task "..."'
+
+# Or in docker-compose:
+services:
+  devbox-agent:
+    build: ./images/devdocker
+    environment:
+      - OP_SERVICE_ACCOUNT_TOKEN=${OP_SERVICE_ACCOUNT_TOKEN}
+```
+
+### What's different in agent mode
+| | Human (interactive) | Agent |
+|---|---|---|
+| 1Password auth | `op signin` (interactive) | `OP_SERVICE_ACCOUNT_TOKEN` (env var) |
+| SSH keys | `op://Private/dev/*` | `op://Agents/agent-ssh/*` |
+| Claude Code token | `op://Private/Anthropic/...` via `op_exec_interactive` | `op://Agents/claude-code/credential` via `op read` |
+| Git identity | `Ankit Soni <dev@ankitson.com>` | `Devbox Agent <agent@ankitson.com>` |
+| First-run script | `~/first-run.sh` | `~/agent-first-run.sh` |
+
+### Security
+- Token passed at runtime only (never baked into image layers)
+- Service account has READ-only access to `Agents` vault — no access to `Private` vault
+- Dedicated SSH keypair — independently revocable
+- All service account reads are logged in 1Password audit trail
 
 ## Python / uv cache
 

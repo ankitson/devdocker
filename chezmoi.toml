@@ -9,6 +9,7 @@
   personal = false
   is_devbox = true
   is_homeserver = false
+  is_agent = false
   internal_network = false
   javaHome = ""
   cudaPath = "/usr/local/cuda"

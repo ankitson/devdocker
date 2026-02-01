@@ -84,8 +84,9 @@ RUN sudo ln -sf /home/ankit/.local/bin/vendor/wezterm /usr/local/bin/wezterm && 
     sudo ln -sf /home/ankit/.local/bin/vendor/wezterm-mux-server /usr/local/bin/wezterm-mux-server && \
     sudo ln -sf /home/ankit/.local/bin/vendor/strip-ansi-escapes /usr/local/bin/strip-ansi-escapes
 
-# First-run setup script (1Password, personal chezmoi, SSH remote)
+# First-run setup scripts
 COPY --chown=ankit:users first-run.sh /home/ankit/first-run.sh
+COPY --chown=ankit:users agent-first-run.sh /home/ankit/agent-first-run.sh
 
 # Projects mount point + uv README
 RUN sudo mkdir -p /projects && sudo chown ankit:users /projects
@@ -95,8 +96,8 @@ COPY --chown=ankit:users docs/uv-README.md /home/ankit/uv-README.md
 USER root
 RUN mkdir /var/run/sshd
 
-# Login message: remind to run first-run.sh if not yet done
-RUN printf '#!/bin/bash\nif [ ! -f "$HOME/.first-run-done" ] && [ -f "$HOME/first-run.sh" ]; then\n  echo ""\n  echo "  *** First time? Run ~/first-run.sh to set up 1Password + personal dotfiles ***"\n  echo ""\nfi\n' > /etc/profile.d/first-run-notice.sh
+# Login message: remind to run first-run.sh (or agent-first-run.sh) if not yet done
+RUN printf '#!/bin/bash\nif [ ! -f "$HOME/.first-run-done" ] && [ -f "$HOME/first-run.sh" ]; then\n  echo ""\n  if [ -n "${OP_SERVICE_ACCOUNT_TOKEN:-}" ]; then\n    echo "  Agent mode detected. Run ~/agent-first-run.sh"\n  else\n    echo "  *** First time? Run ~/first-run.sh to set up 1Password + personal dotfiles ***"\n  fi\n  echo ""\nfi\n' > /etc/profile.d/first-run-notice.sh
 
 # Harden sshd
 RUN sed -i 's/#\?PermitRootLogin .*/PermitRootLogin no/' /etc/ssh/sshd_config && \

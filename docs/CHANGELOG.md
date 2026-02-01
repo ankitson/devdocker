@@ -1,5 +1,32 @@
 # Devbox Docker Changelog
 
+## v1.3 (2026-02-01)
+
+Agent mode: non-interactive setup for automated agents using 1Password service accounts.
+
+### Agent mode (`is_agent` flag)
+- New chezmoi data flag `is_agent`: auto-detected when `OP_SERVICE_ACCOUNT_TOKEN` is set in the environment
+- When `is_agent` is true, `personal` is also set to true (agents need secrets deployed), and chezmoi uses `[onepassword] mode = "service"` for all `onepasswordRead` calls
+
+### Vault-aware SSH key templates
+- SSH key templates (`private_id_rsa.tmpl`, `id_rsa.pub.tmpl`, `authorized_keys.tmpl`) now read from `op://Agents/agent-ssh/` for agents, `op://Private/dev/` for humans
+- Agents use a dedicated SSH keypair, independently revocable from the personal key
+
+### Agent-safe `claudep`
+- Agent mode: `claudep` reads the Claude Code token via `op read "op://Agents/claude-code/credential"` (direct service account read)
+- Interactive mode: unchanged, still uses `op_exec_interactive` with Private vault
+
+### Agent git identity
+- Agents commit as `Devbox Agent <agent@ankitson.com>` for clear attribution
+- `[url] insteadOf` block enabled for agents (SSH URLs work once agent SSH keys are deployed)
+
+### Non-interactive first-run
+- New `agent-first-run.sh`: requires only `OP_SERVICE_ACCOUNT_TOKEN` in env, runs `chezmoi init --apply` without prompts
+- Login message updated to detect agent mode and suggest `~/agent-first-run.sh`
+
+### Build-time config
+- Added `is_agent = false` to build-time `chezmoi.toml`
+
 ## v1.2 (2026-02-01)
 
 Fix chezmoi dotfiles: broken .git pointer, missing ~/bin PATH, missing aliases, 1Password prompts.
