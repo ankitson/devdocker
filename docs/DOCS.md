@@ -19,7 +19,7 @@ devbase                    nvidia/cuda:12.8.1 + locale + user creation (base.sh)
 
 ### Stage 2: devbase_langtoolchains
 System-wide installs (as root):
-- **devbase.sh**: apt packages (build tools, monitoring, cli tools), neovim (GitHub release), just, cloudflared, docker-ce-cli, terraform, 1password CLI
+- **devbase.sh**: apt packages (build tools, monitoring, cli tools), neovim (GitHub release), git-lfs (GitHub release), just, cloudflared, docker-ce-cli, terraform, 1password CLI
 - **cpp.sh**: clang/LLVM toolchain, cmake, ninja, meson
 - **node.sh**: Node 24 via nodesource, pnpm, bun, typescript, codex, gemini-cli
 - **sql.sh**: PostgreSQL client, SQLite
@@ -32,7 +32,7 @@ User home dir installs (as `ankit`):
 
 ### Stage 3: devbox
 - SSH keys from `ssh-keys/` baked into `~/.ssh/` via `addssh.sh`
-- chezmoi dotfiles applied from `dotfiles/` source directory
+- chezmoi dotfiles cloned from `https://github.com/ankitson/dotfiles.git` and applied (two-pass)
 - `/projects` mount point created (persistent workspace)
 - sshd hardened and set as entrypoint (port 22 internal, mapped to 2201 on host)
 
@@ -43,11 +43,11 @@ images/devdocker/
   Dockerfile              # three-stage build
   build.sh                # docker build wrapper
   chezmoi.toml            # build-time chezmoi config (personal=false)
-  dotfiles/               # chezmoi source directory (git submodule or inline)
+  dotfiles/               # chezmoi source directory (git submodule, cloned from GitHub at build)
   ssh-keys/               # ed25519 keypair (gitignored)
   addssh.sh               # copies ssh-keys/ into ~/.ssh/ during build
   base.sh                 # user creation, locale
-  devbase.sh              # apt packages, neovim, just, terraform, 1password, cloudflared, docker
+  devbase.sh              # apt packages, neovim, git-lfs, just, terraform, 1password, cloudflared, docker
   cpp.sh                  # clang/LLVM, cmake, ninja, meson
   node.sh                 # Node.js, pnpm, bun, typescript, AI assistants
   sql.sh                  # PostgreSQL client, SQLite
@@ -69,15 +69,32 @@ The tradeoff: changes to `~` outside of `/projects` (e.g. installing a new cargo
 
 ## Chezmoi dotfiles
 
+**Important:** dotfiles changes must be pushed to GitHub before building the Docker image (the build clones from GitHub).
+
 ### Build time
-The `dotfiles/` directory is copied to `~/.local/share/chezmoi/` (chezmoi's source dir). A static `chezmoi.toml` overrides the template with build-safe defaults:
+Dotfiles are cloned from `https://github.com/ankitson/dotfiles.git` into `~/.local/share/chezmoi/` (chezmoi's source dir). This gives chezmoi a real git repo with a remote, so `chezmoi update` works at runtime. (The previous `COPY dotfiles/` approach broke because the submodule `.git` pointer was invalid inside Docker.)
+
+A static `chezmoi.toml` is copied after the clone, overriding the template with build-safe defaults:
 - `personal = false` — skips 1Password secret retrieval and SSH key deployment
 - `internal_network = false` — external dependencies (clankerpedia) clone from GitHub HTTPS instead of Gitea SSH (Docker build network can't reach Gitea)
 
-`chezmoi apply --force` deploys: `.bashrc`, `.bash_profile`, `.alias.sh`, `.gitconfig`, `.gitignore_global`, `.tmux.conf`, `.sqliterc`, `.git-branch.sh`, `.vimrc`, nvim config, Claude Code settings. It also fetches external deps (tpm, vim-plug, clankerpedia) and runs `run_once_*` scripts (nvim PlugInstall, tmux plugin install, clankerpedia symlink setup).
+`chezmoi apply` runs twice (two-pass):
+1. **First pass** (`chezmoi apply --force`): creates `.bashrc` with PATH entries for dirs that already exist (`.cargo/bin`, `.local/bin` from prior installs). Aliases may be incomplete since `lookPath` can't find tools not yet on PATH.
+2. **Second pass** (`bash -ic 'chezmoi apply --force'`): starts an interactive shell that sources the `.bashrc` from pass 1, giving the full PATH. Now `lookPath` succeeds for eza, cargo, uv, uvx, etc., so aliases and tool-conditional blocks render correctly.
+
+Deployed files: `.bashrc`, `.bash_profile`, `.alias.sh`, `.gitconfig`, `.gitignore_global`, `.tmux.conf`, `.sqliterc`, `.git-branch.sh`, `.vimrc`, nvim config, Claude Code settings. Also fetches external deps (tpm, vim-plug, clankerpedia) and runs `run_once_*` scripts.
 
 ### Runtime
-After booting and signing into 1Password, run `chezmoi init` to re-evaluate `.chezmoi.toml.tmpl`. The template detects hostname `devbox` and sets `personal = true`, `internal_network = true`. Then `chezmoi apply` deploys SSH keys from 1Password and switches clankerpedia source to internal Gitea.
+
+**`chezmoi apply --force`** (safe, no auth needed): uses the existing build-time config (`personal=false`), re-renders templates with the current PATH. Good for picking up dotfile changes without enabling personal features.
+
+**`chezmoi update`**: pulls latest dotfiles from the GitHub remote and re-applies. No auth needed (HTTPS clone).
+
+**`chezmoi init --apply`** (requires 1Password): re-evaluates `.chezmoi.toml.tmpl`, which detects hostname `devbox` and sets `personal=true`, `internal_network=true`. This enables SSH key templates that call `onepasswordRead`. Requires 1Password auth first:
+```bash
+eval $(op signin)
+chezmoi init --apply
+```
 
 ### What chezmoi manages
 | Source file | Target | Notes |
@@ -132,6 +149,7 @@ Tools installed from apt get the Ubuntu 22.04 repo version. Tools with significa
 | ripgrep | `cargo install` | `~/.cargo/bin/` | `cargo install ripgrep` |
 | fd | `cargo install` | `~/.cargo/bin/` | `cargo install fd-find` |
 | eza | `cargo install` | `~/.cargo/bin/` | `cargo install eza` |
+| git-lfs | GitHub release | `/usr/local/bin/` | Rebuild image (downloads latest) |
 | neovim | GitHub release | `/opt/nvim-linux-x86_64/` | Rebuild image (downloads latest) |
 | just | install script | `/usr/local/bin/` | Rebuild image |
 | terraform | GitHub release | `/usr/local/bin/` | Update version in `devbase.sh` |

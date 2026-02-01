@@ -87,15 +87,13 @@ sudo apt-get update
 sudo apt update
 sudo apt install -y -q docker-ce-cli
 
-# add terraform
+# add terraform (SHA256 verified, GPG signature check skipped — HashiCorp key import
+# fails in minimal Docker builds without a pre-seeded keyring)
 wget https://releases.hashicorp.com/terraform/1.14.4/terraform_1.14.4_linux_amd64.zip && \
   wget https://releases.hashicorp.com/terraform/1.14.4/terraform_1.14.4_SHA256SUMS && \
-  wget https://releases.hashicorp.com/terraform/1.14.4/terraform_1.14.4_SHA256SUMS.sig && \
-  wget -qO- https://www.hashicorp.com/.well-known/pgp-key.txt | gpg --import && \
-  gpg --verify terraform_1.14.4_SHA256SUMS.sig terraform_1.14.4_SHA256SUMS && \
   grep terraform_1.14.4_linux_amd64.zip terraform_1.14.4_SHA256SUMS | sha256sum -c && \
   sudo unzip terraform_1.14.4_linux_amd64.zip -d /usr/local/bin/ && \
-  rm -f terraform_1.14.4_linux_amd64.zip terraform_1.14.4_SHA256SUMS terraform_1.14.4_SHA256SUMS.sig
+  rm -f terraform_1.14.4_linux_amd64.zip terraform_1.14.4_SHA256SUMS
 
 # add 1password
 ARCH="amd64"; \
@@ -104,3 +102,13 @@ ARCH="amd64"; \
   https://cache.agilebits.com/dist/1P/op2/pkg/"$OP_VERSION"/op_linux_amd64_"$OP_VERSION".zip \
   && sudo unzip -od /usr/local/bin/ op.zip \
   && rm op.zip
+
+# add gitea tea cli
+curl -fsSL https://dl.gitea.com/tea/0.11.1/tea-0.11.1-linux-amd64 -o tea && \
+  sudo install -m 755 tea /usr/local/bin/tea && \
+  rm tea
+
+# add duckdb
+curl -fsSL https://install.duckdb.org/v1.4.4/duckdb_cli-linux-amd64.gz | gunzip > duckdb && \
+  sudo install -m 755 duckdb /usr/local/bin/duckdb && \
+  rm duckdb

@@ -70,10 +70,22 @@ COPY ssh-keys/ /home/ankit/ssh-keys
 RUN sudo bash addssh.sh ankit && sudo rm -rf /home/ankit/addssh.sh /home/ankit/ssh-keys/
 
 # Dotfiles via chezmoi
+# Install chezmoi, clone dotfiles from GitHub (public HTTPS, no auth needed),
+# then two-pass apply: first creates .bashrc with PATH, second (via interactive
+# bash) gets full PATH so lookPath succeeds for eza, cargo, uv, etc.
 RUN sudo sh -c "$(curl -fsLS get.chezmoi.io)" -- -b /usr/local/bin
-COPY --chown=ankit:users dotfiles/ /home/ankit/.local/share/chezmoi/
+RUN git lfs install && git clone https://github.com/ankitson/dotfiles.git ~/.local/share/chezmoi
 COPY --chown=ankit:users chezmoi.toml /home/ankit/.config/chezmoi/chezmoi.toml
-RUN chezmoi apply --force
+RUN chezmoi apply --force && bash -ic 'chezmoi apply --force'
+
+# Wezterm: symlink to /usr/local/bin so SSHMUX can find the binaries
+# (user-local paths like ~/.local/bin/vendor aren't on the SSHMUX lookup path)
+RUN sudo ln -sf /home/ankit/.local/bin/vendor/wezterm /usr/local/bin/wezterm && \
+    sudo ln -sf /home/ankit/.local/bin/vendor/wezterm-mux-server /usr/local/bin/wezterm-mux-server && \
+    sudo ln -sf /home/ankit/.local/bin/vendor/strip-ansi-escapes /usr/local/bin/strip-ansi-escapes
+
+# First-run setup script (1Password, personal chezmoi, SSH remote)
+COPY --chown=ankit:users first-run.sh /home/ankit/first-run.sh
 
 # Projects mount point + uv README
 RUN sudo mkdir -p /projects && sudo chown ankit:users /projects
@@ -82,6 +94,9 @@ COPY --chown=ankit:users docs/uv-README.md /home/ankit/uv-README.md
 # Run an ssh server.
 USER root
 RUN mkdir /var/run/sshd
+
+# Login message: remind to run first-run.sh if not yet done
+RUN printf '#!/bin/bash\nif [ ! -f "$HOME/.first-run-done" ] && [ -f "$HOME/first-run.sh" ]; then\n  echo ""\n  echo "  *** First time? Run ~/first-run.sh to set up 1Password + personal dotfiles ***"\n  echo ""\nfi\n' > /etc/profile.d/first-run-notice.sh
 
 # Harden sshd
 RUN sed -i 's/#\?PermitRootLogin .*/PermitRootLogin no/' /etc/ssh/sshd_config && \

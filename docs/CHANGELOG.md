@@ -1,8 +1,42 @@
 # Devbox Docker Changelog
 
-## v1.1 (2026-01-30)
+## v1.2 (2026-02-01)
+
+Fix chezmoi dotfiles: broken .git pointer, missing ~/bin PATH, missing aliases, 1Password prompts.
+
+### Chezmoi: git clone instead of COPY
+- Replaced `COPY dotfiles/` with `git clone https://github.com/ankitson/dotfiles.git` — fixes broken `.git` submodule pointer that caused chezmoi failures inside Docker
+- Two-pass `chezmoi apply`: first pass creates `.bashrc` with PATH, second pass (interactive bash) gets full PATH so `lookPath` succeeds for eza, cargo, uv, etc.
+- `chezmoi update` now works at runtime (real git remote instead of dead COPY)
+- **Build dependency:** dotfiles changes must be pushed to GitHub before building
+
+### Dotfiles: bin/ → .local/bin/
+- Moved `dotfiles/bin/vendor/` → `dotfiles/dot_local/bin/vendor/` so chezmoi deploys to `~/.local/bin/vendor/` instead of `~/bin/vendor/`
+- Fixes `stat` failure during template rendering (`~/bin` didn't exist at chezmoi apply time; `~/.local/bin` does from prior installs)
+- Updated `.gitattributes` LFS paths for the new location
+- Updated PATH list in `dot_bashrc.tmpl`: removed `"bin"` and `"bin/vendor"`, added `".local/bin/vendor"`
+
+### Terraform install fix
+- Removed GPG signature verification from terraform install in `devbase.sh` — HashiCorp key import fails in minimal Docker builds without a pre-seeded GPG keyring. SHA256 checksum verification is still performed.
+
+### Wezterm: symlink to /usr/local/bin for SSHMUX
+- Wezterm SSHMUX requires binaries (`wezterm`, `wezterm-mux-server`, `strip-ansi-escapes`) on a system PATH like `/usr/local/bin` — it doesn't search user-local paths like `~/.local/bin/vendor/`
+- Added symlinks from `/usr/local/bin/` → `~/.local/bin/vendor/` in Dockerfile after chezmoi apply
+
+### First-run script
+- Added `first-run.sh`: signs into 1Password, runs `chezmoi init --apply` (personal=true), switches dotfiles remote to SSH (`git@github.com:ankitson/dotfiles.git`)
+- Login shell shows a reminder to run `~/first-run.sh` until it's been completed (via `/etc/profile.d/` script + `~/.first-run-done` marker)
+
+### Docs
+- Updated chezmoi section in DOCS.md: build dependency on GitHub, two-pass apply, runtime workflow (apply vs update vs init), 1Password auth requirement
+
+## v1.1 (2026-01-31)
 
 Chezmoi dotfiles v2, ed25519 SSH keys, host-shared uv cache, latest dev tool versions.
+
+### Git LFS
+- Added `git-lfs` installed from latest GitHub release (not apt) in `devbase.sh`
+- Runs `git lfs install` to set up global hooks
 
 ### Python: host-shared uv cache (replaces baked-in ML packages)
 - Added `/etc/uv/uv.toml` with system-wide config: `cache-dir = "/projects/.uv-cache"`, `link-mode = "hardlink"`, PyTorch CUDA 12.8 index
