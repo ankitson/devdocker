@@ -74,6 +74,7 @@ RUN sudo bash addssh.sh ankit && sudo rm -rf /home/ankit/addssh.sh /home/ankit/s
 # then two-pass apply: first creates .bashrc with PATH, second (via interactive
 # bash) gets full PATH so lookPath succeeds for eza, cargo, uv, etc.
 RUN sudo sh -c "$(curl -fsLS get.chezmoi.io)" -- -b /usr/local/bin
+RUN mkdir -p ~/.ssh && ssh-keyscan github.com >> ~/.ssh/known_hosts
 RUN --mount=type=ssh git lfs install && git clone git@github.com:ankitson/dotfiles.git ~/.local/share/chezmoi
 COPY --chown=ankit:users chezmoi.toml /home/ankit/.config/chezmoi/chezmoi.toml
 RUN chezmoi apply --force && bash -ic 'chezmoi apply --force'
