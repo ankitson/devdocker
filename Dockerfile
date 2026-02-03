@@ -70,11 +70,11 @@ COPY ssh-keys/ /home/ankit/ssh-keys
 RUN sudo bash addssh.sh ankit && sudo rm -rf /home/ankit/addssh.sh /home/ankit/ssh-keys/
 
 # Dotfiles via chezmoi
-# Install chezmoi, clone dotfiles from GitHub (public HTTPS, no auth needed),
+# Install chezmoi, clone dotfiles via SSH (using host's SSH agent via --mount=type=ssh),
 # then two-pass apply: first creates .bashrc with PATH, second (via interactive
 # bash) gets full PATH so lookPath succeeds for eza, cargo, uv, etc.
 RUN sudo sh -c "$(curl -fsLS get.chezmoi.io)" -- -b /usr/local/bin
-RUN git lfs install && git clone https://github.com/ankitson/dotfiles.git ~/.local/share/chezmoi
+RUN --mount=type=ssh git lfs install && git clone git@github.com:ankitson/dotfiles.git ~/.local/share/chezmoi
 COPY --chown=ankit:users chezmoi.toml /home/ankit/.config/chezmoi/chezmoi.toml
 RUN chezmoi apply --force && bash -ic 'chezmoi apply --force'
 

@@ -1,5 +1,14 @@
 # Devbox Docker Changelog
 
+## v1.4 (2026-02-02)
+
+Simplified git clone using BuildKit SSH mount.
+
+### BuildKit SSH mount for git clone
+- Replaced HTTPS clone with SSH clone using `--mount=type=ssh`
+- `build.sh` now passes `--ssh default` to forward host SSH agent
+- Removes dependency on repo being publicly accessible via HTTPS
+
 ## v1.3 (2026-02-01)
 
 Agent mode: non-interactive setup for automated agents using 1Password service accounts.

@@ -74,3 +74,23 @@ Four issues with chezmoi dotfiles in Docker build:
 - Generate and add agent SSH keypair
 - Build image and test with `OP_SERVICE_ACCOUNT_TOKEN`
 - Verify: SSH keys deployed, `claudep` works, git push works, Private vault inaccessible
+
+## 2026-02-02: Simplify git clone with BuildKit SSH mount
+
+### Problem
+The Dockerfile used HTTPS to clone the dotfiles repo during build because SSH keys aren't available inside the build context. This worked but required the repo to be public and added unnecessary complexity to the documentation.
+
+### Solution
+Use Docker BuildKit's `--mount=type=ssh` feature to forward the host's SSH agent into the build. This allows direct SSH git clone without baking secrets into the build.
+
+### Changes
+- `Dockerfile`: Changed `RUN git lfs install && git clone https://...` to `RUN --mount=type=ssh git lfs install && git clone git@github.com:...`
+- `build.sh`: Added `--ssh default` flag to forward SSH agent
+
+### Requirements
+- SSH agent must be running on host with GitHub key loaded (`ssh-add`)
+- Build command forwards agent: `docker build --ssh default ...`
+
+### Next steps
+- Ensure `ssh-agent` is running and key is loaded before build
+- Test with `./build.sh`
