@@ -17,6 +17,11 @@ uv init my-ml-project && cd my-ml-project
 Add to `pyproject.toml`:
 
 ```toml
+[[tool.uv.index]]
+name = "pytorch-cu128"
+url = "https://download.pytorch.org/whl/cu128"
+explicit = true
+
 [tool.uv.sources]
 torch = [{ index = "pytorch-cu128", marker = "sys_platform == 'linux'" }]
 torchvision = [{ index = "pytorch-cu128", marker = "sys_platform == 'linux'" }]

@@ -108,6 +108,20 @@ curl -fsSL https://dl.gitea.com/tea/0.11.1/tea-0.11.1-linux-amd64 -o tea && \
   sudo install -m 755 tea /usr/local/bin/tea && \
   rm tea
 
+# pandoc + PDF dependencies (LaTeX engine, pango, fonts, SVG support)
+sudo apt install -y -q \
+  pandoc                \
+  libpango-1.0-0       \
+  libpangocairo-1.0-0  \
+  libpangoft2-1.0-0    \
+  librsvg2-bin         \
+  texlive-latex-base   \
+  texlive-latex-recommended \
+  texlive-latex-extra  \
+  texlive-fonts-recommended \
+  texlive-xetex        \
+  lmodern              \
+
 # add duckdb
 curl -fsSL https://install.duckdb.org/v1.4.4/duckdb_cli-linux-amd64.gz | gunzip > duckdb && \
   sudo install -m 755 duckdb /usr/local/bin/duckdb && \
