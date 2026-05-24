@@ -17,6 +17,9 @@ yes | unminimize
 apt install -y sudo
 sed -ie '/sudo/ s/ALL$/NOPASSWD: ALL/' /etc/sudoers
 
+# Ubuntu 24.04 ships with a default 'ubuntu' user at UID 1000; remove it so we can claim that UID.
+userdel -r ubuntu 2>/dev/null || true
+
 useradd ankit -u 1000 -d /home/ankit -s /bin/bash -g users -G sudo --no-create-home
 mkdir -p /home/ankit && /bin/chown ankit:users /home/ankit
 

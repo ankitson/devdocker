@@ -9,3 +9,6 @@ sudo tar -C /usr/local -xzf go1.25.6.linux-amd64.tar.gz
 
 # fzf (Ubuntu 22.04 apt has 0.29, latest is 0.57+)
 GOBIN=/usr/local/bin /usr/local/go/bin/go install github.com/junegunn/fzf@latest
+
+# xurl (X/Twitter API CLI; used by birdclaw for live reads/writes)
+GOBIN=/usr/local/bin /usr/local/go/bin/go install github.com/xdevplatform/xurl@latest

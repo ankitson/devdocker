@@ -2,6 +2,18 @@
 set -x
 set -e
 
+# Ubuntu 24.04: some packages (e.g. pcp, pulled in transitively by dstat) run systemctl
+# in their postinst, which fails in a Docker build with no running systemd ("System has not
+# been booted with systemd"). Divert systemctl to a no-op for the duration of this script so
+# package configuration succeeds; restore it on exit.
+#
+# Done unconditionally (not guarded on systemctl existing) because the minimal CUDA base image
+# has no systemctl yet — systemd is pulled in mid-build as a dependency. The diversion makes
+# dpkg install the real binary as systemctl.distrib, leaving our /bin/true symlink in place.
+sudo dpkg-divert --local --rename --add /usr/bin/systemctl
+sudo ln -sf /bin/true /usr/bin/systemctl
+trap 'sudo rm -f /usr/bin/systemctl; sudo dpkg-divert --local --rename --remove /usr/bin/systemctl' EXIT
+
 sudo apt update && sudo apt upgrade -y
 
 #NOTE: no whitespace after slashes in the following lines
@@ -35,7 +47,7 @@ sudo apt install -y -q \
   iputils-ping         \
   traceroute           \
   dnsutils             \
-  netcat               \
+  netcat-openbsd       \
   ngrep                \
   tcpdump              \
 
