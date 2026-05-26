@@ -61,6 +61,9 @@ RUN bash rust.sh
 # Claude Code (native binary, installs to ~/.local/bin)
 RUN curl -fsSL https://claude.ai/install.sh | bash
 
+# Pi Coding Agent (native binary, installs to ~/.local/bin)
+RUN curl -fsSL https://pi.dev/install.sh | sh
+
 WORKDIR /
 
 RUN sudo rm -rf /tmp/build
