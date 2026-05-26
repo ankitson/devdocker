@@ -17,3 +17,14 @@ chmod 644 "$sshdir/authorized_keys"
 
 chown -R 1000:1000 "$sshdir"
 chmod 700 "$sshdir"
+
+# Install persistent SSH host keys (so the fingerprint survives rebuilds)
+for keytype in ed25519 rsa ecdsa; do
+  keyfile="./ssh-keys/ssh_host_${keytype}_key"
+  if [ -f "$keyfile" ]; then
+    cp "$keyfile" "/etc/ssh/ssh_host_${keytype}_key"
+    cp "${keyfile}.pub" "/etc/ssh/ssh_host_${keytype}_key.pub"
+    chmod 600 "/etc/ssh/ssh_host_${keytype}_key"
+    chmod 644 "/etc/ssh/ssh_host_${keytype}_key.pub"
+  fi
+done

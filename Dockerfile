@@ -41,6 +41,11 @@ RUN bash sql.sh
 COPY go.sh /tmp/build/
 RUN bash go.sh
 
+# Browser/Playwright: global npm package + system deps + Chromium binary (needs node.sh)
+COPY browser.sh /tmp/build/
+RUN bash browser.sh
+ENV PLAYWRIGHT_BROWSERS_PATH=/opt/playwright-browsers
+
 # System-wide uv config (PyTorch CUDA index, host-shared cache at /projects/.uv-cache)
 COPY uv.toml /etc/uv/uv.toml
 

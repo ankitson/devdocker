@@ -6,6 +6,9 @@ services:
     hostname: devbox2
     ports:
       - "2201:22"
+      - "9223:9222"  # Playwright headless browser (container → host)
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     volumes:
       - devbox_home:/home/dev
     restart: always

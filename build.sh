@@ -10,4 +10,6 @@ if [ -z "${SSH_AUTH_SOCK:-}" ] || [ ! -S "$SSH_AUTH_SOCK" ]; then
   exit 1
 fi
 
-sudo SSH_AUTH_SOCK="$SSH_AUTH_SOCK" DOCKER_BUILDKIT=1 docker build --ssh default --rm -t ankit/devbox:1.2 . 2>&1 | tee logs/build.log
+sudo SSH_AUTH_SOCK="$SSH_AUTH_SOCK" DOCKER_BUILDKIT=1 docker build --ssh default --rm -t ankit/devbox:1.4 . 2>&1 | tee logs/build.log
+
+#TODO also tag ankit/devbox:latest
