@@ -18,3 +18,6 @@ sudo npm install -g typescript
 # AI coding assistants
 sudo npm install -g @openai/codex
 sudo npm install -g @google/gemini-cli
+sudo npm install -g @earendil-works/pi-coding-agent   # pi coding agent CLI
+sudo npm install -g pi-acp                            # ACP adapter for pi (spawns `pi --mode rpc`)
+sudo npm install -g opencode-ai                       # opencode coding agent CLI (native acpx harness)
