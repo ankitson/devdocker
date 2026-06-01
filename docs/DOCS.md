@@ -126,12 +126,12 @@ chezmoi init --apply
 For automated agents (CI, Claude Code tasks, etc.) that need secrets but can't use interactive 1Password sign-in.
 
 ### Prerequisites
-1. A 1Password **`Agents` vault** with items: `agent-ssh` (SSH keypair), `claude-code` (OAuth token)
-2. A 1Password **service account** with READ access to the `Agents` vault
+1. A service-account-readable 1Password vault with the `agent-ssh` SSH keypair
+2. A 1Password **service account** with READ access to the required agent secrets
 3. The service account token (`ops_...`) passed as `OP_SERVICE_ACCOUNT_TOKEN` at runtime
 
 ### How it works
-When `OP_SERVICE_ACCOUNT_TOKEN` is set, chezmoi automatically sets `is_agent=true` and `personal=true`. The `[onepassword] mode = "service"` config tells chezmoi to use the service account token instead of `op signin` sessions. All `onepasswordRead` calls in templates use the `Agents` vault instead of the `Private` vault.
+When `OP_SERVICE_ACCOUNT_TOKEN` is set, chezmoi automatically sets `is_agent=true` and `personal=true`. The `[onepassword] mode = "service"` config tells chezmoi to use the service account token instead of `op signin` sessions. Agent SSH templates read the shared key from `op://clankers/agent-ssh`; the private-key read requests `?ssh-format=openssh` so OpenSSH receives its native format.
 
 ### Setup
 ```bash
@@ -151,14 +151,14 @@ services:
 | | Human (interactive) | Agent |
 |---|---|---|
 | 1Password auth | `op signin` (interactive) | `OP_SERVICE_ACCOUNT_TOKEN` (env var) |
-| SSH keys | `op://Private/dev/*` | `op://Agents/agent-ssh/*` |
+| SSH keys | `op://Private/dev/*` | `op://clankers/agent-ssh/*` |
 | Claude Code token | `op://Private/Anthropic/...` via `op_exec_interactive` | `op://Agents/claude-code/credential` via `op read` |
 | Git identity | `Ankit Soni <dev@ankitson.com>` | `Devbox Agent <agent@ankitson.com>` |
 | First-run script | `~/first-run.sh` | `~/agent-first-run.sh` |
 
 ### Security
 - Token passed at runtime only (never baked into image layers)
-- Service account has READ-only access to `Agents` vault — no access to `Private` vault
+- Service account has READ-only access to required agent secrets — no access to `Private` vault
 - Dedicated SSH keypair — independently revocable
 - All service account reads are logged in 1Password audit trail
 

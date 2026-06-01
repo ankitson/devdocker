@@ -94,3 +94,11 @@ Use Docker BuildKit's `--mount=type=ssh` feature to forward the host's SSH agent
 ### Next steps
 - Ensure `ssh-agent` is running and key is loaded before build
 - Test with `./build.sh`
+
+## 2026-06-01: Render shared agent SSH key from clankers vault
+
+- Updated the agent-mode SSH templates to read `op://clankers/agent-ssh`.
+- Added `?ssh-format=openssh` to the private-key reference. 1Password stores the generated
+  Ed25519 key in its native representation and renders OpenSSH format on request.
+- Verified the rendered private key and public field both resolve to fingerprint
+  `SHA256:H9dn3AaiRr+GArviYaCPKqvDkTRg6SgwJdSQDytkj68`.

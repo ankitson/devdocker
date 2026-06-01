@@ -1,5 +1,12 @@
 # Devbox Docker Changelog
 
+## Unreleased (2026-06-01)
+
+### Shared agent SSH key rendering
+- Updated agent-mode SSH templates to read `op://clankers/agent-ssh`.
+- Requested `?ssh-format=openssh` for the generated Ed25519 private key so deployed SSH
+  clients receive OpenSSH-native key material.
+
 ## v1.4 (2026-02-02)
 
 Simplified git clone using BuildKit SSH mount.
